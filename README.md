@@ -1,6 +1,22 @@
-# TV Hub V4, Student Starter, Práctica Integradora 1
+# TV Hub V6, Teacher Reference
 
-Proyecto de clase con Node.js, Express, TypeScript, MongoDB y Mongoose. Esta es la base estudiantil de TV Hub V4 para completar el flujo MVC de Watch sin cambiar la arquitectura existente.
+Proyecto de clase con Node.js, Express, TypeScript, MongoDB y Mongoose. Esta versión docente incluye las implementaciones completas de Watch y Channel Reports.
+
+TV Hub V6 agrega operaciones de soporte sobre Reports: correo con Nodemailer, escalación programada con node-cron, sincronización en tiempo real con Socket.IO, cierre administrativo y métricas de atención. Los usuarios ven sus propios Reports; el rol `ADMIN` usa `/support-reports.html` y `/support-metrics.html`. Consulte [la guía de operaciones de V6](docs/tv-hub-v6-operations.md).
+
+## Session 15: TODOs pendientes de V6
+
+Esta rama conserva siete puntos de trabajo para Session 15. Los TODOs históricos de V4 y V4.5 no forman parte de esta lista.
+
+| TODO | Archivo | Actividad |
+| --- | --- | --- |
+| TODO V6 CRON 1 | `src/jobs/report-escalation.job.ts` | Escalar Reports `OPEN` vencidos, persistirlos y emitir su actualización. |
+| TODO V6 CRON 2 | `src/jobs/report-escalation.job.ts` | Programar el job periódico con `node-cron` y manejar sus errores. |
+| TODO V6 CRON 3 | `src/server.ts` | Iniciar el job después de conectar MongoDB. |
+| TODO V6 MAIL 1 | `src/notifications/report-email.ts` | Construir el email de creación de un Report. |
+| TODO V6 MAIL 2 | `src/notifications/report-email.ts` | Construir el email de resolución de un Report. |
+| TODO V6 MAIL 3 | `src/controllers/report.controller.ts` | Intentar el email de creación después de persistir, sin revertir el Report ante un fallo. |
+| TODO V6 MAIL 4 | `src/controllers/report.controller.ts` | Intentar el email de resolución después de persistir, sin revertir el cierre ante un fallo. |
 
 ## Práctica Integradora 1
 
@@ -11,7 +27,6 @@ Proyecto de clase con Node.js, Express, TypeScript, MongoDB y Mongoose. Esta es 
 - Home agrupa canales por país, muestra hasta cinco por país y permite filtrar por categoría.
 - Favorites permite buscar y ordenar canales guardados; Country muestra todos los canales de un país.
 - Watch obtiene un canal por HTTP y usa Shaka Player para intentar reproducción HLS y DASH.
-- Watch contiene ocho TODOs guiados. Consulte `docs/practica-integradora-1-student-starter.md`.
 - Favorites está completo: permite crear, consultar y quitar favoritos, con estado visual sincronizado en Home y My Favorites.
 - Los ejercicios guiados están en `docs/session-10-student-checkpoints.md`.
 - Los ejercicios de Favorites están en `docs/session-12-student-checkpoints.md`.
@@ -19,18 +34,7 @@ Proyecto de clase con Node.js, Express, TypeScript, MongoDB y Mongoose. Esta es 
 
 ## Session 14: Channel Reports
 
-La actividad agrega un flujo de reportes para que una persona autenticada pueda enviar un problema de un canal y, de forma opcional, una evidencia de imagen. La arquitectura mantiene Route, Middleware, Controller, Model y View.
-
-Los siguientes TODOs corresponden a la actividad base. El primero debe completarse para levantar el servidor sin error; los demás se resuelven para completar el flujo de Reports.
-
-| TODO | Archivo a modificar | Requerido para levantar el servidor sin error |
-| --- | --- | --- |
-| TODO v4.5 1 | `src/routes/report.routes.ts` | Sí |
-| TODO v4.5 2 | `src/controllers/report.controller.ts` | No |
-| TODO v4.5 3 | `src/controllers/report.controller.ts` | No |
-| TODO v4.5 4 | `src/public/js/reports.js` | No |
-| TODO v4.5 5 | `src/public/js/reports.js` | No |
-| TODO v4.5 6 | `src/controllers/report.controller.ts` | No |
+La actividad agrega un flujo de reportes para que una persona autenticada pueda enviar un problema de un canal, adjuntar hasta cinco evidencias de imagen, editar el reporte y eliminarlo junto con sus archivos locales. La arquitectura mantiene Route, Middleware, Controller, Model y View.
 
 ## Requirements
 
@@ -69,7 +73,7 @@ npm run import:channels -- docs/japon_playlist.m3u Japan
 
 La importación individual usa país más `tvgId` o, si falta, país más `streamUrl`, por lo que se puede ejecutar otra vez sin crear duplicados.
 
-La práctica deja intencionalmente incompletos los TODOs de Watch. Antes de resolverlos, la compilación y las pruebas que cargan Express pueden fallar; esto es parte del ejercicio.
+Las ramas históricas `tv-hub-v5-final` y `tv-hub-v5-base` corresponden al material de V5. Este workspace contiene la referencia docente actual de TV Hub V6.
 
 Un clon nuevo usa `.env.example` automáticamente en desarrollo, por lo que no requiere crear un `.env` para empezar la clase. Si se necesita personalizar la configuración local, crear el archivo ignorado por Git:
 
@@ -99,6 +103,8 @@ El flujo usa Route, Controller, Mongoose Model y MongoDB. Para canales intervien
 
 Para favoritos intervienen `home.js`, `favorite.routes.ts`, `authenticate`, `favorite.controller.ts`, `favorite.model.ts` y MongoDB. Un índice único en `userId` y `channelId` evita que un usuario guarde el mismo canal dos veces.
 
+Para Reports intervienen `reports.js`, `report.routes.ts`, `authenticate`, Multer, `report.controller.ts`, `report.model.ts`, MongoDB y `uploads/reports`. El POST acepta hasta cinco imágenes. PATCH solo modifica `reason`, `description` y `status`; DELETE elimina el Report propio y procura borrar sus evidencias locales. Los estados disponibles son `OPEN`, `IN_PROGRESS` y `RESOLVED`.
+
 ## API
 
 | Method | Endpoint               | Description                    |
@@ -118,7 +124,9 @@ Para favoritos intervienen `home.js`, `favorite.routes.ts`, `authenticate`, `fav
 | POST   | `/api/favorites/:channelId` | Adds an active channel to the current user's favorites |
 | DELETE | `/api/favorites/:channelId` | Removes a channel from the current user's favorites |
 | GET | `/api/reports` | Current user's reports, newest first |
-| POST | `/api/reports` | Creates a report with optional image evidence |
+| POST | `/api/reports` | Creates a report with up to five optional image evidences |
+| PATCH | `/api/reports/:id` | Updates reason, description and status of the current user's report |
+| DELETE | `/api/reports/:id` | Deletes the current user's report and its local evidence files |
 
 Las rutas de favoritos están completas en esta versión de referencia. Consulte `docs/session-12-student-checkpoints.md` para la secuencia didáctica de la funcionalidad.
 

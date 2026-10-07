@@ -8,6 +8,8 @@ export const reportReasons = [
   'OTHER'
 ] as const;
 
+export const reportStatuses = ['OPEN', 'IN_PROGRESS', 'ESCALATED', 'RESOLVED'] as const;
+
 const reportSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -15,11 +17,11 @@ const reportSchema = new Schema(
     reason: { type: String, enum: reportReasons, required: true },
     description: { type: String, required: true, trim: true, maxlength: 1000 },
     evidenceUrls: { type: [String], default: [] },
-    //status: { type: String, enum: ['OPEN'], required: true, default: 'OPEN' }
-    status: { type: String, enum: ['OPEN', 'IN_REVIEW', 'RESOLVED'], required: true, default: 'OPEN' }
+    status: { type: String, enum: reportStatuses, required: true, default: 'OPEN' },
+    resolvedAt: { type: Date },
+    resolvedBy: { type: Schema.Types.ObjectId, ref: 'User' }
   },
   { timestamps: true }
 );
 
-export const reportStatuses = ['OPEN', 'IN_REVIEW', 'RESOLVED'] as const;
 export const Report = model('Report', reportSchema);

@@ -19,9 +19,9 @@
       </aside>
       <section class="content">
         <header class="topbar"><div></div><div class="account"><p id="welcome">Loading your session…</p><button id="logout" class="logout-button">Log out</button></div></header>
-        <section class="page-hero"><p class="eyebrow">CHANNEL REPORTS</p><h1>Reports</h1><p>Share a problem with a channel and attach an image if it helps explain it.</p></section>
+        <section class="page-hero"><p class="eyebrow">CHANNEL REPORTS</p><h1>Reports</h1><p>Share a problem with a channel and attach images if they help explain it.</p></section>
         <section id="report-form-section" class="report-panel" hidden>
-          <h2 id="report-form-title">Report a problem</h2>
+          <h2>Report a problem</h2>
           <p id="report-channel">Selected channel</p>
           <form id="report-form">
             <input id="report-channel-id" name="channelId" type="hidden" />
@@ -38,27 +38,20 @@
             <label for="report-description">Description
               <textarea id="report-description" name="description" maxlength="1000" required></textarea>
             </label>
-            <label for="report-status" id="report-status-field" hidden>Status
-              <select id="report-status" name="status">
-                <option value="OPEN">Open</option>
-                <option value="IN_REVIEW">In review</option>
-                <option value="RESOLVED">Resolved</option>
-              </select>
-            </label>
-            <label for="report-evidence" id="report-evidence-field">Evidence image (optional)
+            <label for="report-evidence">Evidence images (optional, up to 5)
               <input id="report-evidence" name="evidence" type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple />
             </label>
-            <button type="submit" id="report-submit">Submit report</button>
-            <button type="button" id="report-cancel" hidden>Cancel</button>
+            <button type="submit">Submit report</button>
             <p id="report-form-status" class="form-status" aria-live="polite"></p>
           </form>
         </section>
         <section class="browse-section">
-          <div class="section-heading"><h2>My reports</h2><p id="reports-status">Loading reports…</p></div>
+          <div class="section-heading"><h2>My reports</h2><label>Show <select id="reports-filter"><option value="open">Open</option><option value="closed">Closed</option><option value="all">All</option></select></label><p id="reports-status">Loading reports…</p></div>
           <div id="reports-list" class="reports-list"></div>
         </section>
       </section>
     </main>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/js/reports.js"></script>
   </body>
 </html>
